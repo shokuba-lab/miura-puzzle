@@ -2,278 +2,520 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f3ece0">
     <title>ミウラパズル 伏字チャレンジ - 競技版</title>
     <style>
         :root {
-            --bg-color: #f7f5f0;
-            --card-bg: #fff;
-            --primary: #822111;
-            --text-color: #333;
-            --border-color: #d1c7bd;
+            --page: #efe8dc;
+            --card: #fbf8f2;
+            --cream: #f4ede1;
+            --cream-deep: #eadfcc;
+            --line: #ddd0bb;
+            --ink: #2b241e;
+            --ink-soft: #6f6458;
+            --accent: #e8892b;
+            --wood: #dcc39a;
+            --wood-deep: #c9a977;
+            --wood-cell: #f3e7d1;
+            --c1: #e0352b;
+            --c2: #f0b21c;
+            --c3: #1f9a55;
+            --c4: #2c68dc;
+            --radius-lg: 28px;
+            --radius-md: 18px;
+            --shadow: 0 10px 30px rgba(74, 54, 30, 0.12), 0 2px 6px rgba(74, 54, 30, 0.06);
         }
+        * { box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
-            padding: 12px;
+            min-height: 100vh;
+            background: radial-gradient(120% 80% at 50% 0%, #f7f2ea 0%, var(--page) 70%);
+            color: var(--ink);
+            font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: max(14px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
+        }
+        button, input, textarea { font: inherit; color: inherit; }
+        button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+        .app {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 20px 16px 18px;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 14px;
         }
-        .container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 18px;
-            box-sizing: border-box;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 12px;
-            border-bottom: 2px solid var(--bg-color);
-            padding-bottom: 8px;
-        }
-        .title-area h1 {
-            font-size: 1.8rem;
-            margin: 0;
-            color: #1c4587;
-            letter-spacing: 1px;
-        }
-        .title-area span {
-            font-size: 0.85rem;
-            color: #666;
-        }
-        /* 大きなカウンター表示 */
-        .dashboard {
-            background: #fdfbf7;
-            border: 2px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .prob-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #444;
-        }
-        .timer-large {
-            color: #822111;
-            font-family: monospace;
-            font-size: 2.2rem;
-            font-weight: bold;
-            line-height: 1;
-        }
-        .controls-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 6px;
-        }
-        .load-box {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .load-box input {
-            width: 60px;
-            padding: 6px;
-            font-size: 0.9rem;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-        }
-        button {
-            background: #2a2a2a;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:active {
-            opacity: 0.7;
-        }
-        .btn-primary { background: #4a86e8; }
-        .btn-accent { background: #16a765; }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+        /* ヘッダー */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
-        .cell {
-            aspect-ratio: 1;
-            background: #f0eae1;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
+        .brand-badge {
+            flex: none;
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: linear-gradient(160deg, #3a3029, #1f1915);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 10px rgba(31,25,21,0.25);
+        }
+        .brand-text { min-width: 0; }
+        .brand-text h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            line-height: 1.15;
+        }
+        .brand-text p {
+            margin: 4px 0 0;
+            font-size: 0.82rem;
+            color: var(--ink-soft);
+            letter-spacing: 0.02em;
+        }
+
+        /* 上の3つのボタン */
+        .toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .pill {
+            min-width: 0;
+            border: 1.5px solid var(--line);
+            background: var(--cream);
+            border-radius: var(--radius-md);
+            padding: 11px 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.1s;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 0.86rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 0 rgba(120, 95, 60, 0.12);
+            transition: transform 0.08s, box-shadow 0.08s;
         }
-        .cell.masked {
-            background: #e0d6cc;
-            color: #888;
-            border-style: dashed;
+        .pill:active { transform: translateY(1px); box-shadow: none; }
+        .pill .icon { font-size: 1rem; line-height: 1; }
+        .pill.dark {
+            background: linear-gradient(160deg, #3a3029, #1f1915);
+            border-color: #1f1915;
+            color: #fff;
         }
-        .cell-1 { background: #fb4c2f; color: #fff; border-color: #c5331a; }
-        .cell-2 { background: #fad165; color: #333; border-color: #d4a938; }
-        .cell-3 { background: #16a765; color: #fff; border-color: #0d7042; }
-        .cell-4 { background: #4a86e8; color: #fff; border-color: #275cb8; }
+        .pill.on { background: #fff4e6; border-color: var(--accent); }
 
-        .instruction {
-            font-size: 0.85rem;
-            color: #555;
-            background: #f9f6f0;
-            padding: 8px 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        /* 下段：記録・感想記入・共有スペース */
-        .record-section {
-            background: #fdfbf7;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 10px;
-        }
-        .record-section h3 {
-            font-size: 0.9rem;
-            margin: 0 0 8px 0;
-            color: #1c4587;
+        /* 問題番号とタイマー */
+        .scoreboard {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            align-items: stretch;
+            background: var(--cream);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-md);
+            overflow: hidden;
         }
-        .record-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            align-items: center;
-        }
-        .record-row label {
-            min-width: 70px;
-            color: #555;
-            font-weight: bold;
-        }
-        .record-row input, .record-row textarea {
+        .scoreboard > div {
             flex: 1;
-            padding: 6px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.85rem;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+        .scoreboard > div + div { border-left: 1.5px dashed var(--line); text-align: right; }
+        .label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--ink-soft);
+            letter-spacing: 0.12em;
+        }
+        .prob-display {
+            font-size: 1.15rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+        .timer-large {
+            font-family: ui-monospace, "SF Mono", "Consolas", monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #8a2416;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 問題の呼び出し */
+        .jump {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .jump-field {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 4px 4px 4px 12px;
         }
-        .record-row textarea {
-            resize: none;
-            height: 40px;
-        }
-        .share-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .share-actions button {
+        .jump-field span { font-weight: 800; font-size: 0.85rem; color: var(--ink-soft); }
+        .jump-field input {
             flex: 1;
-            padding: 8px;
-            font-size: 0.85rem;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 6px 2px;
         }
-        .nav-footer {
+        .small-btn {
+            border: none;
+            border-radius: 11px;
+            padding: 8px 14px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            background: var(--ink);
+            color: #fff;
+            white-space: nowrap;
+        }
+        .small-btn.light {
+            background: var(--cream);
+            color: var(--ink);
+            border: 1.5px solid var(--line);
+            padding: 10px 12px;
+        }
+
+        /* 案内のカード */
+        .status-card {
+            position: relative;
             display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            border: 1.5px solid var(--ink);
+            border-left-width: 6px;
+            border-radius: var(--radius-md);
+            padding: 13px 14px;
+            min-height: 64px;
+        }
+        .status-card::before {
+            content: "";
+            flex: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(232, 137, 43, 0.18);
+        }
+        .status-card.cleared { border-color: var(--c3); }
+        .status-card.cleared::before { background: var(--c3); box-shadow: 0 0 0 4px rgba(31, 154, 85, 0.18); }
+        #instruction-text {
+            font-weight: 800;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        /* 盤面（木の枠） */
+        .board-wrap {
+            background: #fff;
+            border: 1.5px solid #efe6d6;
+            border-radius: 26px;
+            padding: 12px;
+            box-shadow: inset 0 2px 6px rgba(120, 95, 60, 0.06);
+        }
+        .board {
+            background: linear-gradient(160deg, var(--wood) 0%, var(--wood-deep) 100%);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25), inset 0 -3px 8px rgba(90, 60, 25, 0.18);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 7px;
+            background: rgba(120, 85, 40, 0.12);
+            border: 2px solid rgba(150, 110, 60, 0.35);
+            border-radius: 14px;
+            padding: 7px;
+        }
+        .cell {
+            aspect-ratio: 1;
+            background: var(--wood-cell);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            box-shadow: inset 0 -2px 0 rgba(120, 85, 40, 0.12);
+        }
+        .cell.masked { cursor: pointer; background: #fbf3e4; }
+        .cell.masked::after {
+            content: "";
+            position: absolute;
+            inset: 7%;
+            border-radius: 50%;
+            border: 2px dashed var(--accent);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        .cell.masked:active .ball { transform: scale(0.92); }
+        .ball {
+            width: 74%;
+            height: 74%;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 900;
+            font-size: clamp(1.1rem, 6.4vw, 1.75rem);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            transition: transform 0.08s;
+            position: relative;
+        }
+        .ball::before {
+            content: "";
+            position: absolute;
+            inset: 13%;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            pointer-events: none;
+        }
+        .ball-1 { background: radial-gradient(circle at 35% 30%, #ff8a78 0%, var(--c1) 45%, #9e1a12 100%); box-shadow: 0 3px 6px rgba(158, 26, 18, 0.35); }
+        .ball-2 { background: radial-gradient(circle at 35% 30%, #ffe08a 0%, var(--c2) 45%, #a8740a 100%); box-shadow: 0 3px 6px rgba(168, 116, 10, 0.35); }
+        .ball-3 { background: radial-gradient(circle at 35% 30%, #7fe0a6 0%, var(--c3) 45%, #0d6034 100%); box-shadow: 0 3px 6px rgba(13, 96, 52, 0.35); }
+        .ball-4 { background: radial-gradient(circle at 35% 30%, #8fb6ff 0%, var(--c4) 45%, #163f99 100%); box-shadow: 0 3px 6px rgba(22, 63, 153, 0.35); }
+        .grid.cleared .cell.masked::after { border-style: solid; border-color: var(--c3); }
+        .board-hint {
+            margin: 10px 4px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+        }
+        .board-hint .ring {
+            display: inline-block;
+            width: 0.9em;
+            height: 0.9em;
+            border: 2px dashed var(--accent);
+            border-radius: 50%;
+            vertical-align: -0.1em;
+            margin-right: 2px;
+        }
+
+        /* 記録のカード */
+        .record {
+            background: var(--cream);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .record-head {
+            display: flex;
+            align-items: center;
             justify-content: space-between;
             gap: 8px;
-            margin-top: 12px;
         }
-        .nav-footer button {
-            flex: 1;
-            padding: 10px;
+        .record-head h2 { margin: 0; font-size: 0.95rem; font-weight: 900; }
+        #clear-status-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            background: #fff;
+            border: 1.5px solid currentColor;
+            border-radius: 999px;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+        .record-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .field input, .field textarea {
+            width: 100%;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            padding: 8px 10px;
+            font-size: 0.92rem;
+        }
+        .field input[readonly] { background: #f7f1e6; font-weight: 800; }
+        #memo-time { color: #8a2416; font-variant-numeric: tabular-nums; }
+        .field textarea { resize: none; height: 64px; line-height: 1.45; }
+        .record-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .wide-btn {
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+        }
+        .wide-btn:active { transform: translateY(1px); box-shadow: none; }
+        .wide-btn.green { background: var(--c3); color: #fff; }
+        .wide-btn.dark { background: linear-gradient(160deg, #3a3029, #1f1915); color: #fff; }
+
+        /* 下のナビ */
+        .nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        /* ルール説明 */
+        dialog {
+            width: min(92vw, 400px);
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 22px 20px 18px;
+            background: var(--card);
+            color: var(--ink);
+            box-shadow: var(--shadow);
+        }
+        dialog::backdrop { background: rgba(31, 25, 21, 0.45); }
+        dialog h2 { margin: 0 0 12px; font-size: 1.15rem; font-weight: 900; }
+        dialog ol { margin: 0 0 16px; padding-left: 1.3em; line-height: 1.65; font-size: 0.92rem; }
+        dialog li + li { margin-top: 6px; }
+        dialog .wide-btn { width: 100%; }
+
+        @media (max-width: 360px) {
+            .app { padding: 16px 12px 14px; }
+            .brand { gap: 10px; }
+            .brand-badge { width: 46px; height: 46px; border-radius: 14px; font-size: 0.85rem; }
+            .brand-text h1 { font-size: 1.5rem; }
+            .brand-text p { font-size: 0.72rem; }
+            .pill { font-size: 0.8rem; gap: 4px; padding: 10px 4px; }
+            .pill .icon { display: none; }
+            .scoreboard > div { padding: 9px 10px; }
+            .prob-display { font-size: 1rem; }
+            .timer-large { font-size: 1.6rem; }
+            .board-wrap { padding: 8px; }
+            .board { padding: 7px; }
+            .grid { gap: 5px; padding: 5px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- ヘッダー：ミウラパズル名称を大きく -->
-    <div class="header">
-        <div class="title-area">
+<main class="app">
+    <!-- ヘッダー -->
+    <header class="brand">
+        <div class="brand-badge" aria-hidden="true">4×4</div>
+        <div class="brand-text">
             <h1>ミウラパズル</h1>
-            <span>4×4 ラテン方陣 伏字競技チャレンジ</span>
+            <p>4×4 ラテン方陣 伏字競技チャレンジ</p>
         </div>
+    </header>
+
+    <!-- 上の3つのボタン -->
+    <div class="toolbar">
+        <button class="pill" id="bgm-btn" onclick="toggleBgm()"><span class="icon" aria-hidden="true">♪</span><span id="bgm-label">BGM: OFF</span></button>
+        <button class="pill" onclick="openRules()"><span class="icon" aria-hidden="true">📖</span><span>ルール</span></button>
+        <button class="pill dark" onclick="resetProblem()"><span class="icon" aria-hidden="true">↻</span><span>やり直す</span></button>
     </div>
 
-    <!-- 状態バー：問題番号（3桁） ＆ 超大型カウンター -->
-    <div class="dashboard">
-        <div class="prob-display" id="prob-num-display">問題 No.001</div>
-        <div class="timer-large" id="timer-display">00:00.0</div>
-    </div>
-
-    <!-- コントロール上部：問題番号ダイレクト呼び出し ＆ BGM -->
-    <div class="controls-top">
-        <div class="load-box">
-            <span style="font-size:0.8rem; font-weight:bold;">No.</span>
-            <input type="text" id="input-prob-num" value="1" maxlength="3" onchange="jumpToProblemNum()">
-            <button class="btn-primary" onclick="jumpToProblemNum()">呼出</button>
+    <!-- 問題番号とタイマー -->
+    <div class="scoreboard">
+        <div>
+            <span class="label">PROBLEM</span>
+            <div class="prob-display" id="prob-num-display">問題 No.001</div>
         </div>
         <div>
-            <button id="bgm-btn" onclick="toggleBgm()">BGM: OFF</button>
-            <button onclick="resetProblem()">やり直す</button>
+            <span class="label">TIME</span>
+            <div class="timer-large" id="timer-display">00:00.0</div>
         </div>
     </div>
 
-    <div class="instruction" id="instruction-text">
-        ？（伏字）のマスをタップして数値を変更し、ラテン方陣を完成させてください。
+    <!-- 問題の呼び出し -->
+    <div class="jump">
+        <label class="jump-field">
+            <span>No.</span>
+            <input type="text" id="input-prob-num" value="1" maxlength="3" inputmode="numeric" onchange="jumpToProblemNum()" aria-label="問題番号">
+            <button class="small-btn" onclick="jumpToProblemNum()">呼出</button>
+        </label>
+        <button class="small-btn light" onclick="randomProblem()">🔀 ランダム</button>
     </div>
 
-    <!-- パズル盤面 -->
-    <div class="grid" id="puzzle-grid"></div>
+    <!-- 案内 -->
+    <div class="status-card" id="status-card">
+        <span id="instruction-text">？（伏字）のマスをタップして数値を変更し、ラテン方陣を完成させてください。</span>
+    </div>
 
-    <!-- 下段：空白欄（問題番号・完成時間・感想記入 ＆ 友達への共有） -->
-    <div class="record-section">
-        <h3>
-            <span>📝 記録・対戦メモ用紙</span>
-            <span id="clear-status-badge" style="font-size:0.75rem; color:#822111;">未クリア</span>
-        </h3>
-        <div class="record-row">
-            <label>出題番号:</label>
-            <input type="text" id="memo-prob" readonly style="background:#f0eae1;">
-            <label>完成時間:</label>
-            <input type="text" id="memo-time" readonly style="background:#f0eae1; font-weight:bold; color:#822111;">
+    <!-- 盤面 -->
+    <div class="board-wrap">
+        <div class="board">
+            <div class="grid" id="puzzle-grid"></div>
         </div>
-        <div class="record-row" style="align-items: flex-start;">
-            <label style="padding-top:4px;">感想・戦略:</label>
+        <p class="board-hint"><span class="ring" aria-hidden="true"></span>点線の輪のマスをタップすると 1→2→3→4 と変わります</p>
+    </div>
+
+    <!-- 記録・対戦メモ -->
+    <section class="record">
+        <div class="record-head">
+            <h2>📝 記録・対戦メモ</h2>
+            <span id="clear-status-badge" style="color:#822111;">未クリア</span>
+        </div>
+        <div class="record-fields">
+            <div class="field">
+                <span class="label">出題番号</span>
+                <input type="text" id="memo-prob" readonly>
+            </div>
+            <div class="field">
+                <span class="label">完成時間</span>
+                <input type="text" id="memo-time" readonly>
+            </div>
+        </div>
+        <div class="field">
+            <span class="label">感想・戦略</span>
             <textarea id="memo-comment" placeholder="ここに感想や攻略法をご記入ください（例：中央の推理に苦戦した！）"></textarea>
         </div>
-        <div class="share-actions">
-            <button class="btn-accent" onclick="copyChallengeText()">📋 記録をコピーして友達に送る</button>
-            <button class="btn-primary" onclick="nextProblem()">次の問題へ ➡</button>
+        <div class="record-actions">
+            <button class="wide-btn green" onclick="copyChallengeText()">📋 記録をコピーして友達に送る</button>
         </div>
-    </div>
+    </section>
 
-    <div class="nav-footer">
-        <button onclick="prevProblem()">◀ 前の問題</button>
-        <button onclick="randomProblem()">🔀 ランダム出題</button>
-    </div>
-</div>
+    <!-- 前後の問題 -->
+    <nav class="nav">
+        <button class="wide-btn dark" onclick="prevProblem()">◀ 前の問題</button>
+        <button class="wide-btn dark" onclick="nextProblem()">次の問題 ▶</button>
+    </nav>
+</main>
+
+<!-- ルール説明 -->
+<dialog id="rules-dialog">
+    <h2>📖 ルール</h2>
+    <ol>
+        <li>4×4 のマスに 1〜4 の数字を、縦の列にも横の行にも同じ数字が1回ずつ入るように並べます（ラテン方陣）。</li>
+        <li>点線の輪がついたマスが伏字です。タップするたびに 1→2→3→4 と数字が変わります。</li>
+        <li>最初にタップしたときにタイマーが動き出し、全部そろうとクリアです。</li>
+        <li>問題番号が同じなら、だれでも同じ問題になります。記録をコピーして友達に送り、タイムを競い合いましょう。</li>
+    </ol>
+    <button class="wide-btn dark" onclick="closeRules()">閉じる</button>
+</dialog>
 
 <script>
     // 擬似的に無限（数千通り以上）の問題をシード値（問題番号）から自動生成する仕組み
@@ -308,6 +550,7 @@
         document.getElementById('memo-comment').value = "";
         document.getElementById('clear-status-badge').innerText = "挑戦中...";
         document.getElementById('clear-status-badge').style.color = "#822111";
+        document.getElementById('status-card').classList.remove('cleared');
 
         // シード値（問題番号）を元に乱数を固定化（擬似乱数）
         let seed = probId * 9301 + 49297;
@@ -371,21 +614,25 @@
     function renderBoard() {
         const gridEl = document.getElementById('puzzle-grid');
         gridEl.innerHTML = '';
+        gridEl.classList.toggle('cleared', isCleared);
 
         for(let r=0; r<4; r++) {
             for(let c=0; c<4; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 const val = board[r][c];
+                const ball = document.createElement('div');
+                ball.className = 'ball';
 
                 if(mask[r][c]) {
                     cell.classList.add('masked');
-                    cell.innerText = val ? val : '？';
-                    if(val) cell.classList.add(`cell-${val}`);
+                    ball.innerText = val ? val : '？';
+                    if(val) ball.classList.add(`ball-${val}`);
                 } else {
-                    cell.classList.add(`cell-${val}`);
-                    cell.innerText = val;
+                    ball.classList.add(`ball-${val}`);
+                    ball.innerText = val;
                 }
+                cell.appendChild(ball);
 
                 if(!isCleared) {
                     cell.onclick = () => handleCellClick(r, c);
@@ -438,6 +685,7 @@
         document.getElementById('clear-status-badge').innerText = "🎉 完全クリア！";
         document.getElementById('clear-status-badge').style.color = "#16a765";
         document.getElementById('instruction-text').innerText = `🎉 おめでとうございます！クリアタイム: ${finalTime}`;
+        document.getElementById('status-card').classList.add('cleared');
         renderBoard();
     }
 
@@ -469,6 +717,16 @@
         generateProblem(currentProbId);
     }
 
+    // ルール説明の開け閉め
+    function openRules() {
+        const d = document.getElementById('rules-dialog');
+        if(typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    }
+    function closeRules() {
+        const d = document.getElementById('rules-dialog');
+        if(typeof d.close === 'function') d.close(); else d.removeAttribute('open');
+    }
+
     // 友達に結果を共有するためのコピー機能
     function copyChallengeText() {
         const probNumStr = String(currentProbId).padStart(3, '0');
@@ -497,8 +755,8 @@
     function toggleBgm() {
         initAudio();
         bgmEnabled = !bgmEnabled;
-        const btn = document.getElementById('bgm-btn');
-        btn.innerText = bgmEnabled ? "BGM: ON" : "BGM: OFF";
+        document.getElementById('bgm-label').innerText = bgmEnabled ? "BGM: ON" : "BGM: OFF";
+        document.getElementById('bgm-btn').classList.toggle('on', bgmEnabled);
         if(bgmEnabled && startTime && !isCleared) {
             startBgm();
         } else {
