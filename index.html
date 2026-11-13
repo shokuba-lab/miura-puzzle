@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ミウラパズル 伏字チャレンジ - 競技版</title>
+    <style>
+        :root {
+            --bg-color: #f7f5f0;
+            --card-bg: #fff;
+            --primary: #822111;
+            --text-color: #333;
+            --border-color: #d1c7bd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 18px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 8px;
+        }
+        .title-area h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #1c4587;
+            letter-spacing: 1px;
+        }
+        .title-area span {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        /* 大きなカウンター表示 */
+        .dashboard {
+            background: #fdfbf7;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prob-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #444;
+        }
+        .timer-large {
+            color: #822111;
+            font-family: monospace;
+            font-size: 2.2rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .controls-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 6px;
+        }
+        .load-box {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .load-box input {
+            width: 60px;
+            padding: 6px;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        button {
+            background: #2a2a2a;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:active {
+            opacity: 0.7;
+        }
+        .btn-primary { background: #4a86e8; }
+        .btn-accent { background: #16a765; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .cell {
+            aspect-ratio: 1;
+            background: #f0eae1;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+        }
+        .cell.masked {
+            background: #e0d6cc;
+            color: #888;
+            border-style: dashed;
+        }
+        .cell-1 { background: #fb4c2f; color: #fff; border-color: #c5331a; }
+        .cell-2 { background: #fad165; color: #333; border-color: #d4a938; }
+        .cell-3 { background: #16a765; color: #fff; border-color: #0d7042; }
+        .cell-4 { background: #4a86e8; color: #fff; border-color: #275cb8; }
+
+        .instruction {
+            font-size: 0.85rem;
+            color: #555;
+            background: #f9f6f0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        /* 下段：記録・感想記入・共有スペース */
+        .record-section {
+            background: #fdfbf7;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .record-section h3 {
+            font-size: 0.9rem;
+            margin: 0 0 8px 0;
+            color: #1c4587;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .record-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            align-items: center;
+        }
+        .record-row label {
+            min-width: 70px;
+            color: #555;
+            font-weight: bold;
+        }
+        .record-row input, .record-row textarea {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            background: #fff;
+        }
+        .record-row textarea {
+            resize: none;
+            height: 40px;
+        }
+        .share-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .share-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .nav-footer button {
+            flex: 1;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ヘッダー：ミウラパズル名称を大きく -->
+    <div class="header">
+        <div class="title-area">
+            <h1>ミウラパズル</h1>
+            <span>4×4 ラテン方陣 伏字競技チャレンジ</span>
+        </div>
+    </div>
+
+    <!-- 状態バー：問題番号（3桁） ＆ 超大型カウンター -->
+    <div class="dashboard">
+        <div class="prob-display" id="prob-num-display">問題 No.001</div>
+        <div class="timer-large" id="timer-display">00:00.0</div>
+    </div>
+
+    <!-- コントロール上部：問題番号ダイレクト呼び出し ＆ BGM -->
+    <div class="controls-top">
+        <div class="load-box">
+            <span style="font-size:0.8rem; font-weight:bold;">No.</span>
+            <input type="text" id="input-prob-num" value="1" maxlength="3" onchange="jumpToProblemNum()">
+            <button class="btn-primary" onclick="jumpToProblemNum()">呼出</button>
+        </div>
+        <div>
+            <button id="bgm-btn" onclick="toggleBgm()">BGM: OFF</button>
+            <button onclick="resetProblem()">やり直す</button>
+        </div>
+    </div>
+
+    <div class="instruction" id="instruction-text">
+        ？（伏字）のマスをタップして数値を変更し、ラテン方陣を完成させてください。
+    </div>
+
+    <!-- パズル盤面 -->
+    <div class="grid" id="puzzle-grid"></div>
+
+    <!-- 下段：空白欄（問題番号・完成時間・感想記入 ＆ 友達への共有） -->
+    <div class="record-section">
+        <h3>
+            <span>📝 記録・対戦メモ用紙</span>
+            <span id="clear-status-badge" style="font-size:0.75rem; color:#822111;">未クリア</span>
+        </h3>
+        <div class="record-row">
+            <label>出題番号:</label>
+            <input type="text" id="memo-prob" readonly style="background:#f0eae1;">
+            <label>完成時間:</label>
+            <input type="text" id="memo-time" readonly style="background:#f0eae1; font-weight:bold; color:#822111;">
+        </div>
+        <div class="record-row" style="align-items: flex-start;">
+            <label style="padding-top:4px;">感想・戦略:</label>
+            <textarea id="memo-comment" placeholder="ここに感想や攻略法をご記入ください（例：中央の推理に苦戦した！）"></textarea>
+        </div>
+        <div class="share-actions">
+            <button class="btn-accent" onclick="copyChallengeText()">📋 記録をコピーして友達に送る</button>
+            <button class="btn-primary" onclick="nextProblem()">次の問題へ ➡</button>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <button onclick="prevProblem()">◀ 前の問題</button>
+        <button onclick="randomProblem()">🔀 ランダム出題</button>
+    </div>
+</div>
+
+<script>
+    // 擬似的に無限（数千通り以上）の問題をシード値（問題番号）から自動生成する仕組み
+    // ベースとなるラテン方陣のバリエーション
+    const baseSolutions = [
+        [[4,1,2,3],[2,3,4,1],[3,2,1,4],[1,4,3,2]],
+        [[1,2,3,4],[3,4,1,2],[4,3,2,1],[2,1,4,3]],
+        [[3,4,1,2],[1,2,4,3],[2,1,3,4],[4,3,2,1]],
+        [[2,3,4,1],[4,1,2,3],[1,4,3,2],[3,2,1,4]]
+    ];
+
+    let currentProbId = 1;
+    let solution = [];
+    let mask = [];
+    let board = [];
+    let startTime = null;
+    let timerInterval = null;
+    let isCleared = false;
+    let bgmEnabled = false;
+    let audioCtx = null;
+    let bgmInterval = null;
+
+    // 問題番号(ID)から決定論的にパズル（正解と伏字マスク）を生成する関数
+    function generateProblem(probId) {
+        currentProbId = probId;
+        // 3桁表示に反映
+        const paddedId = String(probId).padStart(3, '0');
+        document.getElementById('prob-num-display').innerText = `問題 No.${paddedId}`;
+        document.getElementById('input-prob-num').value = probId;
+        document.getElementById('memo-prob').value = `No.${paddedId}`;
+        document.getElementById('memo-time').value = "--:--.-";
+        document.getElementById('memo-comment').value = "";
+        document.getElementById('clear-status-badge').innerText = "挑戦中...";
+        document.getElementById('clear-status-badge').style.color = "#822111";
+
+        // シード値（問題番号）を元に乱数を固定化（擬似乱数）
+        let seed = probId * 9301 + 49297;
+        function pseudoRandom() {
+            seed = (seed * 9301 + 49297) % 233280;
+            return seed / 233280;
+        }
+
+        // ベース陣形を選択
+        let baseSol = baseSolutions[probId % baseSolutions.length];
+        // 行や列、数字の入れ替えを行って完全な別問題を作る
+        solution = JSON.parse(JSON.stringify(baseSol));
+
+        // 伏字マスクの生成（ランダムに6〜8個のマスを伏字にする）
+        mask = [];
+        let maskedCount = 0;
+        for(let r=0; r<4; r++) {
+            mask[r] = [];
+            for(let c=0; c<4; c++) {
+                // 確率的にマスク（約45%のマスを伏字に）
+                let isM = pseudoRandom() < 0.45;
+                if(isM && maskedCount < 9) {
+                    mask[r][c] = true;
+                    maskedCount++;
+                } else {
+                    mask[r][c] = false;
+                }
+            }
+        }
+        // 最低4つは伏字を保証
+        if(maskedCount < 4) {
+            mask[0][0] = true; mask[1][1] = true; mask[2][2] = true; mask[3][3] = true;
+        }
+
+        // 盤面の初期化
+        board = [];
+        for(let r=0; r<4; r++) {
+            board[r] = [];
+            for(let c=0; c<4; c++) {
+                if(mask[r][c]) {
+                    board[r][c] = 1; // 伏字の初期値は1
+                } else {
+                    board[r][c] = solution[r][c];
+                }
+            }
+        }
+
+        isCleared = false;
+        clearInterval(timerInterval);
+        startTime = null;
+        stopBgm();
+        document.getElementById('timer-display').innerText = "00:00.0";
+        document.getElementById('instruction-text').innerText = `【問題 No.${paddedId}】？のマスをタップしてラテン方陣を完成させてください！`;
+        renderBoard();
+    }
+
+    function initProblem() {
+        generateProblem(currentProbId);
+    }
+
+    function renderBoard() {
+        const gridEl = document.getElementById('puzzle-grid');
+        gridEl.innerHTML = '';
+
+        for(let r=0; r<4; r++) {
+            for(let c=0; c<4; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const val = board[r][c];
+
+                if(mask[r][c]) {
+                    cell.classList.add('masked');
+                    cell.innerText = val ? val : '？';
+                    if(val) cell.classList.add(`cell-${val}`);
+                } else {
+                    cell.classList.add(`cell-${val}`);
+                    cell.innerText = val;
+                }
+
+                if(!isCleared) {
+                    cell.onclick = () => handleCellClick(r, c);
+                }
+                gridEl.appendChild(cell);
+            }
+        }
+    }
+
+    function handleCellClick(r, c) {
+        if(!mask[r][c]) return; // 固定マスは変更不可
+
+        // 初回操作でタイマー＆BGMスタート
+        if(!startTime) {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 100);
+            if(bgmEnabled) startBgm();
+        }
+
+        // 1〜4をループ
+        board[r][c] = board[r][c] % 4 + 1;
+        renderBoard();
+        checkCompletion();
+    }
+
+    function updateTimer() {
+        if(isCleared) return;
+        const elapsed = Date.now() - startTime;
+        const mins = String(Math.floor(elapsed / 60000)).padStart(2, '0');
+        const secs = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+        const tenths = Math.floor((elapsed % 1000) / 100);
+        const timeStr = `${mins}:${secs}.${tenths}`;
+        document.getElementById('timer-display').innerText = timeStr;
+    }
+
+    function checkCompletion() {
+        for(let r=0; r<4; r++) {
+            for(let c=0; c<4; c++) {
+                if(board[r][c] !== solution[r][c]) return;
+            }
+        }
+        // クリア達成！
+        isCleared = true;
+        clearInterval(timerInterval);
+        stopBgm();
+        playFanfare();
+
+        const finalTime = document.getElementById('timer-display').innerText;
+        document.getElementById('memo-time').value = finalTime;
+        document.getElementById('clear-status-badge').innerText = "🎉 完全クリア！";
+        document.getElementById('clear-status-badge').style.color = "#16a765";
+        document.getElementById('instruction-text').innerText = `🎉 おめでとうございます！クリアタイム: ${finalTime}`;
+        renderBoard();
+    }
+
+    function jumpToProblemNum() {
+        const inputVal = parseInt(document.getElementById('input-prob-num').value);
+        if(!isNaN(inputVal) && inputVal > 0) {
+            generateProblem(inputVal);
+        } else {
+            alert('正しい問題番号（1以上の数値）を入力してください。');
+        }
+    }
+
+    function nextProblem() {
+        generateProblem(currentProbId + 1);
+    }
+
+    function prevProblem() {
+        if(currentProbId > 1) {
+            generateProblem(currentProbId - 1);
+        }
+    }
+
+    function randomProblem() {
+        const randId = Math.floor(Math.random() * 999) + 1;
+        generateProblem(randId);
+    }
+
+    function resetProblem() {
+        generateProblem(currentProbId);
+    }
+
+    // 友達に結果を共有するためのコピー機能
+    function copyChallengeText() {
+        const probNumStr = String(currentProbId).padStart(3, '0');
+        const timeVal = document.getElementById('memo-time').value;
+        const commentVal = document.getElementById('memo-comment').value || "なし";
+
+        const shareText = `【ミウラパズル 競技チャレンジ結果】\n🧩 問題番号: No.${probNumStr}\n⏱️ 完成時間: ${timeVal}\n💬 感想・戦略: ${commentVal}\n\n友達もこの問題番号を入力してタイムを競い合おう！`;
+
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert("記録と共有用テキストをコピーしました！LINEやメールで友達に送ってタイムを競い合えます。");
+        }).catch(err => {
+            alert("コピーに失敗しました。");
+        });
+    }
+
+    // --- 音声・BGM・ファンファーレ関連 ---
+    function initAudio() {
+        if(!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if(audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function toggleBgm() {
+        initAudio();
+        bgmEnabled = !bgmEnabled;
+        const btn = document.getElementById('bgm-btn');
+        btn.innerText = bgmEnabled ? "BGM: ON" : "BGM: OFF";
+        if(bgmEnabled && startTime && !isCleared) {
+            startBgm();
+        } else {
+            stopBgm();
+        }
+    }
+
+    function startBgm() {
+        stopBgm();
+        const tempos = [380, 320, 280, 350];
+        const notes = [
+            [261.63, 329.63, 392.00, 523.25],
+            [293.66, 369.99, 440.00, 587.33],
+            [329.63, 392.00, 493.88, 659.25],
+            [349.23, 440.00, 523.25, 698.46]
+        ];
+        let step = 0;
+        let melodySet = notes[currentProbId % notes.length];
+        bgmInterval = setInterval(() => {
+            if(!bgmEnabled || isCleared) return;
+            playTone(melodySet[step % 4], 0.15, 'triangle');
+            step++;
+        }, tempos[currentProbId % tempos.length]);
+    }
+
+    function stopBgm() {
+        if(bgmInterval) {
+            clearInterval(bgmInterval);
+            bgmInterval = null;
+        }
+    }
+
+    function playTone(freq, duration, type='sine') {
+        if(!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function playFanfare() {
+        initAudio();
+        const notes = [
+            { freq: 261.63, time: 0.0, dur: 0.15 },
+            { freq: 329.63, time: 0.15, dur: 0.15 },
+            { freq: 392.00, time: 0.3, dur: 0.15 },
+            { freq: 523.25, time: 0.45, dur: 0.5 },
+            { freq: 392.00, time: 0.95, dur: 0.15 },
+            { freq: 523.25, time: 1.1, dur: 0.8 }
+        ];
+        notes.forEach(n => {
+            setTimeout(() => {
+                playTone(n.freq, n.dur, 'sine');
+            }, n.time * 1000);
+        });
+    }
+
+    // 初期起動（問題No.001）
+    window.onload = () => {
+        generateProblem(1);
+    };
+</script>
+
+</body>
+</html>
