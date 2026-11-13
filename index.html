@@ -123,7 +123,7 @@
         }
         .pill {
             min-width: 0;
-            height: 40px;
+            height: 44px;
             border: 1.5px solid var(--line);
             background: var(--cream);
             border-radius: var(--radius-md);
@@ -210,13 +210,13 @@
             min-width: 0;
             font-weight: 800;
             font-size: 0.8rem;
-            line-height: 1.4;
+            line-height: 1.3;
             word-break: auto-phrase;
         }
         .result-btn {
             display: none;
             flex: none;
-            height: 36px;
+            height: 40px;
             padding: 0 12px;
             border: none;
             border-radius: 11px;
@@ -237,7 +237,9 @@
             container-type: size;
         }
         .board-wrap {
-            width: min(100%, 50vh);
+            /* cqmin が使えない端末の代わり（盤面以外の高さを 300px と見て引く） */
+            width: min(100%, calc(100vh - 300px));
+            width: min(100%, calc(100dvh - 300px));
             aspect-ratio: 1;
             width: 100cqmin;
             height: 100cqmin;
@@ -327,7 +329,13 @@
         .grid.cleared .cell.masked::after { border-style: solid; border-color: var(--c3); }
 
         /* 窓の共通（ルール説明書・クリアの結果・メニュー） */
+        dialog:not([open]) { display: none; }
         dialog {
+            position: fixed;
+            inset: 0;
+            margin: auto;
+            height: fit-content;
+            z-index: 20;
             width: min(calc(100vw - 24px), 400px);
             max-width: none;
             max-height: calc(100vh - 24px);
@@ -373,7 +381,7 @@
             flex: none;
             border: none;
             border-radius: 11px;
-            min-height: 40px;
+            min-height: 44px;
             padding: 0 14px;
             font-weight: 800;
             font-size: 0.85rem;
@@ -411,6 +419,12 @@
         dialog.sheet[open] { animation: sheet-up 0.18s ease-out; }
         @keyframes sheet-up { from { transform: translateY(100%); } }
         @media (prefers-reduced-motion: reduce) { dialog.sheet[open] { animation: none; } }
+        @media (min-width: 600px) {
+            /* タブレットとパソコンでは、カードに重ねて真ん中に出す */
+            dialog.sheet { margin: auto; border-radius: var(--radius-lg); }
+            dialog.sheet[open] { animation: none; }
+        }
+        .wide-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
         .menu-note { margin: 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-soft); }
         .jump {
             display: flex;
@@ -552,12 +566,12 @@
         <span class="label">問題番号でえらぶ</span>
         <label class="jump">
             <span>No.</span>
-            <input type="text" id="input-prob-num" value="1" maxlength="3" inputmode="numeric" onchange="jumpToProblemNum()" aria-label="問題番号">
+            <input type="text" id="input-prob-num" value="1" maxlength="3" inputmode="numeric" enterkeyhint="go" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToProblemNum();}" aria-label="問題番号">
             <button class="small-btn" type="button" onclick="jumpToProblemNum()">呼出</button>
         </label>
         <p class="menu-note">同じ番号なら、だれでも同じ問題になります。</p>
         <div class="two-col">
-            <button class="wide-btn dark" type="button" onclick="prevProblem()">前の問題</button>
+            <button class="wide-btn dark" type="button" id="prev-btn" onclick="prevProblem()">前の問題</button>
             <button class="wide-btn dark" type="button" onclick="nextProblem()">次の問題</button>
         </div>
         <button class="wide-btn light" type="button" onclick="randomProblem()">ランダムに出題</button>
@@ -648,6 +662,7 @@
         clearTimeout(resultTimer);
         closeMenu();
         closeResult();
+        document.getElementById('prev-btn').disabled = probId <= 1; // No.001 より前はない
         currentProbId = probId;
         // 3桁表示に反映
         const paddedId = String(probId).padStart(3, '0');
@@ -797,7 +812,10 @@
         document.getElementById('status-card').classList.add('cleared');
         renderBoard();
         // そろった盤面を少し見せてから、結果の窓を出す
-        resultTimer = setTimeout(openResult, 700);
+        resultTimer = setTimeout(() => {
+            // ほかの窓（メニュー・ルール説明書）を開いている間は重ねない。案内の「結果を見る」から開ける
+            if(!document.querySelector('dialog[open]')) openResult();
+        }, 700);
     }
 
     function jumpToProblemNum() {
@@ -831,18 +849,22 @@
     // 窓（ルール説明書・メニュー・クリアの結果）の開け閉め
     function openDialog(id) {
         const d = document.getElementById(id);
-        if(d.open) return;
+        if(d.hasAttribute('open')) return;
         d.dataset.openedAt = Date.now();
         if(typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
     }
     function closeDialog(id) {
         const d = document.getElementById(id);
-        if(!d.open) return;
+        if(!d.hasAttribute('open')) return;
         if(typeof d.close === 'function') d.close(); else d.removeAttribute('open');
     }
     function openRules() { openDialog('rules-dialog'); }
     function closeRules() { closeDialog('rules-dialog'); }
-    function openMenu() { openDialog('menu-sheet'); }
+    function openMenu() {
+        // 打ちかけて閉じた番号が残らないよう、いまの問題番号に戻してから開く
+        document.getElementById('input-prob-num').value = currentProbId;
+        openDialog('menu-sheet');
+    }
     function closeMenu() { closeDialog('menu-sheet'); }
     function openResult() { if(isCleared) openDialog('result-dialog'); }
     function closeResult() { closeDialog('result-dialog'); }
